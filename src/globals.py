@@ -27,6 +27,7 @@ DATASET_CONFLICTS = [
     "Merge into one dataset",
     "Separate dataset for each project",
 ]
+INIT_PROJECTS_COUNT = 2
 
 
 class State:

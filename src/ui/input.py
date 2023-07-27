@@ -30,7 +30,7 @@ projects_buttons_flexbox = Flexbox([add_project_button, lock_projects_button], g
 projects_container = Container()
 projects_ra = ReloadableArea(projects_container)
 
-error_text = Text("At least 2 projects should be selected", status="error")
+error_text = Text("At least two different projects should be selected", status="error")
 error_text.hide()
 
 unlock_projects_button = Button(
@@ -41,7 +41,7 @@ unlock_projects_button.hide()
 
 card = Card(
     title="1️⃣ Input projects",
-    description="Select projects, which will be merged into one.",
+    description="Select at least two different projects, which will be merged into one.",
     content=Container(
         [projects_ra, projects_buttons_flexbox, error_text],
     ),
@@ -66,6 +66,9 @@ def add_project_widgets():
         button_type="danger",
         button_size="small",
     )
+
+    if flexbox_id < 2:
+        remove_button.disable()
 
     @remove_button.click
     def remove_flexbox():
@@ -168,3 +171,7 @@ def unlock_project():
 
     lock_projects_button.show()
     unlock_projects_button.hide()
+
+
+for _ in range(g.INIT_PROJECTS_COUNT):
+    add_project_widgets()
