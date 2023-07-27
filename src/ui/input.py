@@ -1,158 +1,170 @@
-import os
-
 import supervisely as sly
 from supervisely.app.widgets import (
     Card,
-    SelectDataset,
+    ReloadableArea,
     Button,
+    SelectProject,
+    Flexbox,
     Container,
-    DatasetThumbnail,
     Text,
 )
 
 import src.globals as g
 import src.ui.settings as settings
 
-dataset_thumbnail = DatasetThumbnail()
-dataset_thumbnail.hide()
-
-load_button = Button("Load data")
-change_dataset_button = Button("Change dataset", icon="zmdi zmdi-lock-open")
-change_dataset_button.hide()
-
-no_dataset_message = Text(
-    "Please, select a dataset before clicking the button.",
-    status="warning",
+add_project_button = Button(
+    text="",
+    icon="zmdi zmdi-plus",
+    icon_gap=0,
+    button_type="success",
+    widget_id="AddProjectButton",
 )
-no_dataset_message.hide()
 
-if g.STATE.selected_dataset and g.STATE.selected_project:
-    # If the app was loaded from a dataset.
-    sly.logger.debug("App was loaded from a dataset.")
+lock_projects_button = Button(
+    "Lock projects",
+    icon="zmdi zmdi-lock",
+)
 
-    # Stting values to the widgets from environment variables.
-    select_dataset = SelectDataset(
-        default_id=g.STATE.selected_dataset, project_id=g.STATE.selected_project
-    )
+projects_buttons_flexbox = Flexbox([add_project_button, lock_projects_button], gap=35)
 
-    # Hiding unnecessary widgets.
-    select_dataset.hide()
-    load_button.hide()
+projects_container = Container()
+projects_ra = ReloadableArea(projects_container)
 
-    # Creating a dataset thumbnail to show.
-    dataset_thumbnail.set(
-        g.api.project.get_info_by_id(g.STATE.selected_project),
-        g.api.dataset.get_info_by_id(g.STATE.selected_dataset),
-    )
-    dataset_thumbnail.show()
+error_text = Text("At least 2 projects should be selected", status="error")
+error_text.hide()
 
-    settings.card.unlock()
-    settings.card.uncollapse()
-elif g.STATE.selected_project:
-    # If the app was loaded from a project: showing the dataset selector in compact mode.
-    sly.logger.debug("App was loaded from a project.")
+unlock_projects_button = Button(
+    "Unlock projects",
+    icon="zmdi zmdi-lock-open",
+)
+unlock_projects_button.hide()
 
-    select_dataset = SelectDataset(
-        project_id=g.STATE.selected_project, compact=True, show_label=False
-    )
-else:
-    # If the app was loaded from ecosystem: showing the dataset selector in full mode.
-    sly.logger.debug("App was loaded from ecosystem.")
-
-    select_dataset = SelectDataset()
-
-# Input card with all widgets.
 card = Card(
-    "1️⃣ Input dataset",
-    "Images from the selected dataset will be loaded.",
+    title="1️⃣ Input projects",
+    description="Select projects, which will be merged into one.",
     content=Container(
-        widgets=[
-            dataset_thumbnail,
-            select_dataset,
-            load_button,
-            no_dataset_message,
-        ]
+        [projects_ra, projects_buttons_flexbox, error_text],
     ),
-    content_top_right=change_dataset_button,
+    content_top_right=unlock_projects_button,
     collapsable=True,
+    lock_message="Unlock the card by clicking the `Unlock projects` button in the top right corner.",
 )
 
 
-@load_button.click
-def load_dataset():
-    """Handles the load button click event. Reading values from the SelectDataset widget,
-    calling the API to get project, workspace and team ids (if they're not set),
-    building the table with images and unlocking the rotator and output cards.
-    """
-    # Reading the dataset id from SelectDataset widget.
-    dataset_id = select_dataset.get_selected_id()
+@add_project_button.click
+def add_project_widgets():
+    flexbox_id = len(projects_container._widgets)
 
-    if not dataset_id:
-        # If the dataset id is empty, showing the warning message.
-        no_dataset_message.show()
+    sly.logger.debug(
+        f"Add project button was pressed, flexbox ID was set to {flexbox_id}."
+    )
+
+    remove_button = Button(
+        text="",
+        icon="zmdi zmdi-minus",
+        icon_gap=0,
+        button_type="danger",
+        button_size="small",
+    )
+
+    @remove_button.click
+    def remove_flexbox():
+        del g.STATE.remove_buttons[flexbox_id]
+        del g.STATE.project_selects[flexbox_id]
+
+        sly.logger.debug(
+            f"Remove button and project select was removed from global state with flexbox ID {flexbox_id}."
+        )
+
+        update_projects_widgets()
+
+    project_select = SelectProject(
+        workspace_id=g.STATE.selected_workspace,
+        compact=True,
+        show_label=False,
+    )
+
+    g.STATE.remove_buttons[flexbox_id] = remove_button
+    g.STATE.project_selects[flexbox_id] = project_select
+
+    sly.logger.debug(
+        f"Remove button and project select was added to global state with flexbox ID {flexbox_id}."
+    )
+
+    update_projects_widgets()
+
+
+def update_projects_widgets():
+    remove_buttons = list(g.STATE.remove_buttons.values())
+    project_selects = list(g.STATE.project_selects.values())
+
+    if len(remove_buttons) != len(project_selects):
+        sly.logger.error(
+            f"Length of remove buttons ({len(remove_buttons)}) and project selects "
+            f"({len(project_selects)}) is not equal. It will probably cause an error."
+        )
+
+        sly.app.show_dialog(
+            title="Error in widget engine",
+            description=(
+                "For some reason, number of remove buttons and project selects is not equal. "
+                "It will probably cause an error. It's recommended to restart the application."
+            ),
+            status="error",
+        )
+
+    projects_container._widgets = [
+        Flexbox([project_select, remove_button], gap=20)
+        for project_select, remove_button in zip(project_selects, remove_buttons)
+    ]
+    projects_ra.reload()
+
+
+@lock_projects_button.click
+def lock_project():
+    project_ids = []
+
+    for select_widget in g.STATE.project_selects.values():
+        project_id = select_widget.get_selected_id()
+        if project_id is not None and project_id not in project_ids:
+            project_ids.append(project_id)
+
+    if len(project_ids) < 2:
+        error_text.show()
+
+        sly.logger.warning(
+            "Lock projects button was pressed, but less than 2 projects were selected."
+        )
+
         return
 
-    # Hide the warning message if dataset was selected.
-    no_dataset_message.hide()
+    error_text.hide()
 
-    # Changing the values of the global variables to access them from other modules.
-    g.STATE.selected_dataset = dataset_id
+    g.STATE.project_ids = project_ids
 
-    # Cleaning the static directory when the new dataset is selected.
-    # * If needed, this code can be securely removed.
-    clean_static_dir()
+    sly.logger.info(f"Following project IDs was saved in global state: {project_ids}")
 
-    # Disabling the dataset selector and the load button.
-    select_dataset.disable()
-    load_button.hide()
-
-    # Showing the lock checkbox for unlocking the dataset selector and button.
-    change_dataset_button.show()
-
-    sly.logger.debug(
-        f"Calling API with dataset ID {dataset_id} to get project, workspace and team IDs."
-    )
-
-    g.STATE.selected_project = g.api.dataset.get_info_by_id(dataset_id).project_id
-    g.STATE.selected_workspace = g.api.project.get_info_by_id(
-        g.STATE.selected_project
-    ).workspace_id
-    g.STATE.selected_team = g.api.workspace.get_info_by_id(
-        g.STATE.selected_workspace
-    ).team_id
-
-    sly.logger.debug(
-        f"Recived IDs from the API. Selected team: {g.STATE.selected_team}, "
-        f"selected workspace: {g.STATE.selected_workspace}, selected project: {g.STATE.selected_project}"
-    )
-
-    dataset_thumbnail.set(
-        g.api.project.get_info_by_id(g.STATE.selected_project),
-        g.api.dataset.get_info_by_id(g.STATE.selected_dataset),
-    )
-    dataset_thumbnail.show()
+    card.lock()
+    card.collapse()
 
     settings.card.unlock()
     settings.card.uncollapse()
 
-    card.lock()
+    lock_projects_button.hide()
+    unlock_projects_button.show()
 
 
-def clean_static_dir():
-    # * Utility function to clean static directory, it can be securely removed if not needed.
-    static_files = os.listdir(g.STATIC_DIR)
+@unlock_projects_button.click
+def unlock_project():
+    settings.card.lock()
+    settings.card.collapse()
 
-    sly.logger.debug(
-        f"Cleaning static directory. Number of files to delete: {len(static_files)}."
-    )
-
-    for static_file in static_files:
-        os.remove(os.path.join(g.STATIC_DIR, static_file))
-
-
-@change_dataset_button.click
-def handle_input():
     card.unlock()
-    select_dataset.enable()
-    load_button.show()
-    change_dataset_button.hide()
+    card.uncollapse()
+
+    g.STATE.project_ids = None
+
+    sly.logger.debug("Unlock projects button was pressed, project IDs was cleared.")
+
+    lock_projects_button.show()
+    unlock_projects_button.hide()
