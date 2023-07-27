@@ -213,36 +213,3 @@ def create_dataset(dataset_name: str) -> int:
     return g.api.dataset.create(
         g.STATE.output_project_id, dataset_name, change_name_if_conflict=True
     ).id
-
-
-"""
-def merge_classes():
-    sly.logger.debug("Starting merging project meta.")
-    result_project_meta = sly.ProjectMeta()
-
-    for project_id in g.STATE.project_ids:
-        project_info = g.api.project.get_info_by_id(project_id)
-        project_meta = sly.ProjectMeta.from_json(g.api.project.get_meta(project_id))
-        obj_classes = project_meta.obj_classes
-
-        for obj_class in obj_classes:
-            if obj_class.name in [
-                obj_class.name for obj_class in result_project_meta.obj_classes
-            ]:
-                if g.STATE.settings["class_conflict"] == "Skip":
-                    continue
-                elif g.STATE.settings["class_conflict"] == "Rename":
-                    obj_class = obj_class.clone(
-                        name=f"{project_info.name}_{obj_class.name}"
-                    )
-
-            result_project_meta = result_project_meta.add_obj_class(obj_class)
-
-    print(result_project_meta)
-
-    sly.logger.debug("Finished merging project meta.")
-"""
-
-"""
-
-"""
