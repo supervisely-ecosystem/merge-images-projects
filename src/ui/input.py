@@ -61,7 +61,7 @@ def add_project_widgets():
 
     remove_button = Button(
         text="",
-        icon="zmdi zmdi-minus",
+        icon="zmdi zmdi-close",
         icon_gap=0,
         button_type="danger",
         button_size="small",
