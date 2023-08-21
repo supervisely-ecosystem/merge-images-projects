@@ -259,11 +259,17 @@ def update_label(input_label: sly.Label):
     new_obj_class = input_label.obj_class
     new_label = input_label
 
+    for tag in input_label.tags:
+        if tag.meta not in output_project_meta.tag_metas:
+            sly.logger.debug(f"Adding tag meta {tag.meta.name} to output project meta.")
+
+            output_project_meta = output_project_meta.add_tag_meta(tag.meta)
+
     for obj_class in output_project_meta.obj_classes:
         if obj_class.name == input_label.obj_class.name:
             if obj_class.geometry_type != input_label.obj_class.geometry_type:
                 sly.logger.debug(
-                    f"Ouput project meta already contanins object class with name {obj_class.name}, "
+                    f"Output project meta already contanins object class with name {obj_class.name}, "
                     f"Existing geometry type: {obj_class.geometry_type}, new geometry type: "
                     f"{input_label.obj_class.geometry_type}."
                 )
@@ -293,7 +299,7 @@ def update_label(input_label: sly.Label):
         )
     except DuplicateKeyError:
         sly.logger.debug(
-            f"Ouput project meta already contanins object class with name {new_obj_class.name}. "
+            f"Output project meta already contanins object class with name {new_obj_class.name}. "
             "Project meta was not updated."
         )
 
