@@ -133,6 +133,10 @@ def merge():
         f"Successfully merged {len(g.STATE.project_ids)} projects. App finished."
     )
 
+    from src.main import app
+
+    app.stop()
+
 
 def create_project(project_name: Optional[str]) -> int:
     if not project_name:

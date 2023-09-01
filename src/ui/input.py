@@ -21,7 +21,7 @@ add_project_button = Button(
 )
 
 lock_projects_button = Button(
-    "Lock projects",
+    "Select projects",
     icon="zmdi zmdi-lock",
 )
 
@@ -34,7 +34,7 @@ error_text = Text("At least two different projects should be selected", status="
 error_text.hide()
 
 unlock_projects_button = Button(
-    "Unlock projects",
+    "Change projects",
     icon="zmdi zmdi-lock-open",
 )
 unlock_projects_button.hide()

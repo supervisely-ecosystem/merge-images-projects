@@ -24,12 +24,12 @@ class_conflict_field = Field(
 )
 
 lock_settings_button = Button(
-    text="Lock settings",
+    text="Save settings",
     icon="zmdi zmdi-lock",
 )
 
 unlock_settings_button = Button(
-    text="Unlock settings",
+    text="Change settings",
     icon="zmdi zmdi-lock-open",
 )
 unlock_settings_button.hide()
