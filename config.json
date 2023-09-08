@@ -1,14 +1,18 @@
 {
   "type": "app",
   "version": "2.0.0",
-  "name": "Merge images projects",
-  "description": "Merge different images project into a sinlge one.",
+  "name": "Merge Image Projects",
+  "description": "Merge multiple image projects into a single one",
   "docker_image": "supervisely/base-py-sdk:6.72.82",
-  "categories": ["images"],
-  "icon": "PLACEHOLDER FOR ICON (inserted by designers)",
+  "categories": [
+        "images",
+        "project management",
+        "data operations"
+  ],
+  "icon": "https://github.com/supervisely-ecosystem/merge-images-projects/assets/119248312/15991245-760b-4efb-b82b-6de0051c5c17",
   "icon_cover": true,
   "headless": false,
-  "poster": "PLACEHOLDER FOR POSTER (inserted by designers)",
+  "poster": "https://github.com/supervisely-ecosystem/merge-images-projects/assets/119248312/cd43bf43-b4af-4a7c-b23f-7a8211bb7e6f",
   "entrypoint": "python -m uvicorn src.main:app --host 0.0.0.0 --port 8000",
   "port": 8000,
   "context_menu": {
