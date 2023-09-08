@@ -19,7 +19,7 @@
 
 ## Overview
 
-Looking for an efficient way to merge multiple image projects into one? This application can help! 🔥 It allows you to easily merge an unlimited number of projects and customise the structure of datasets and classes to suit your specific needs. Our application gives you a range of options to ensure the end result is exactly what you want. Say goodbye to the hassle of manually combining image projects and give our application a try.
+Looking for an efficient way to merge multiple image projects into one? This application can help! 🔥 It allows you to easily merge an unlimited number of projects and customise the structure of datasets to suit your specific needs. Our application gives you a range of options to ensure the end result is exactly what you want. Say goodbye to the hassle of manually combining image projects and give our application a try.
 
 ## How To Run
 
