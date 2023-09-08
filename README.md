@@ -25,13 +25,17 @@ Looking for an efficient way to merge multiple image projects into one? This app
 
 App can be launched from the **Ecosystem** or from the `Context menu` of the image project.
 
-**Step 1:** Go to **Ecosystem** page and find the app [Merge Image Projects](https://ecosystem.supervisely.com/apps/merge-images-project).
+**Step 1:** Go to **Ecosystem** page and find the app [Merge Image Projects](https://ecosystem.supervisely.com/apps/merge-images-projects).
 
-<img data-key="sly-module-link" data-module-slug="supervisely-ecosystem/merge-image-projects" width="500px" style='padding-bottom: 20px'/> 
+<img data-key="sly-module-link" data-module-slug="supervisely-ecosystem/merge-images-projects" img src="https://github.com/supervisely-ecosystem/merge-images-projects/assets/115161827/ee88be31-1c9f-4f0a-9ac1-4f235e913c6d" width="500px" style='padding-bottom: 20px'/> 
+
+<img src="https://github.com/supervisely-ecosystem/merge-images-projects/assets/119248312/b8c40fb8-fa91-473f-9d06-ef394b1fa3cb"/>
 
 **Step 2:** Or you can open the project's `Context menu` -> `Run application` -> `Merge Image Projects`.
 
 **Step 3:** Press `Open` button on **Workspace Tasks** page after `Application is started` message.
+
+<img src="https://github.com/supervisely-ecosystem/merge-images-projects/assets/119248312/76c55396-d729-4a94-adcb-afe7f775ffc1"/>
 
 ## How To Use
 
