@@ -1,12 +1,11 @@
 <div align="center" markdown>
-<img src="poster placeholder"/>
+<img src="https://github.com/supervisely-ecosystem/merge-images-projects/assets/119248312/cd43bf43-b4af-4a7c-b23f-7a8211bb7e6f"/>
 
-# Placeholder for app short description
+# Merge Image Projects
 
 <p align="center">
   <a href="#Overview">Overview</a> •
-  <a href="#Preparation">Preparation</a> •
-  <a href="#How-To-Run">How To Run</a>
+  <a href="#How-To-Run">How To Run</a> •
 </p>
 
 [![](https://img.shields.io/badge/supervisely-ecosystem-brightgreen)](https://ecosystem.supervise.ly/apps/supervisely-ecosystem/PLACEHOLDER-FOR-APP-PATH)
@@ -19,34 +18,38 @@
 
 ## Overview
 
-Section for app overview. Describe what the app does, what are the benefits of using it, what is the expected output, etc.
-
-## Preparation
-
-Section for app preparation. Describe what the user should do before running the app. For example, upload images to the team storage, create a project, etc.
+Looking for an efficient way to merge multiple image projects into one? This application can help! 🔥 It allows you to easily merge an unlimited number of projects and customise the structure of datasets and classes to suit your specific needs. Our application gives you a range of options to ensure the end result is exactly what you want. Say goodbye to the hassle of manually combining image projects and give our application a try.
 
 ## How To Run
 
-Section for the app running. Describe how to run the app step by step.
+App can be launched from the **Ecosystem** or from the `Context menu` of the image project.
 
-**Step 1:** Describe actions in step.<br><br>
+**Step 1:** Go to **Ecosystem** page and find the app [Merge Image Projects](https://ecosystem.supervisely.com/apps/merge-images-project).
 
-**Step 2:** Describe actions in step.<br><br>
-<img src="placeholder for screenshot"/><br><br>
+<img data-key="sly-module-link" data-module-slug="supervisely-ecosystem/merge-image-projects" width="500px" style='padding-bottom: 20px'/> 
 
-After finishing using the app, don't forget to stop the app session manually in the App Sessions. The app will write information about the text prompt and CLIP score to the image metadata. You can find this information in the Image Properties - Info section of the image in the labeling tool.
+**Step 2:** Open the `Context menu` of project -> `Run App` -> `Merge Image Projects`.
 
----
+**Step 3:** Press 'Open' button on **Workspace Tasks** page after `Application is started` message.
 
-_This section is about how to use the repo template, it should be removed from README.md after the app is ready to be released._<br>
+## How To Use
 
-### How to use the repo template
+**Step 1:** Select **two or more** different projects to merge into a single project.
 
-1. Clone the repo locally.
-2. Use the `create_venv.sh` script to create a virtual environment and install all required packages.
-3. Fill required fields in the `local.env` file (your IDs: team, workspace, etc.).
-4. Add the required code to the `src/globals.py` file.
-5. The template contains `src/ui/input.py` module, which has ready-to-work code if the app uses images projects or datasets. If you don't need it, you can replace it with your own code.
-6. The template also contains `src/ui/output.py` module, which has ready-to-work code for output, but it can be replaced with your own code.
-7. After implementing all required code and UI, fill in `config.json` file. If needed edit `requirements.txt` file.
-8. The repo is ready now.
+<img src="https://github.com/supervisely-ecosystem/merge-images-projects/assets/119248312/5e0e11ef-4f70-4531-8db6-c2a4c558a922"/>
+
+**Step 2:** Choose a way to resolve conflicts that may arise during the merging of projects.
+
+<img src="https://github.com/supervisely-ecosystem/merge-images-projects/assets/119248312/8b11323c-6585-4ae5-b02f-652fa47c74ca"/>
+
+**Step 3:** Select how the datasets should be structured in the output project and provide a name for the output project.
+
+<img src="https://github.com/supervisely-ecosystem/merge-images-projects/assets/119248312/877e143e-86be-412d-9003-f839c2eba747"/>
+
+**Step 4:** Start the merging process.
+
+<img src="https://github.com/supervisely-ecosystem/merge-images-projects/assets/119248312/3d00f4d5-62c5-444a-bd29-3e72217cda94"/>
+
+## Result
+
+<img src="https://github.com/supervisely-ecosystem/merge-images-projects/assets/119248312/aadecdab-ce66-4f1e-9482-7a9da8c79106"/>
