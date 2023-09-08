@@ -29,9 +29,9 @@ App can be launched from the **Ecosystem** or from the `Context menu` of the ima
 
 <img data-key="sly-module-link" data-module-slug="supervisely-ecosystem/merge-image-projects" width="500px" style='padding-bottom: 20px'/> 
 
-**Step 2:** Open the `Context menu` of project -> `Run App` -> `Merge Image Projects`.
+**Step 2:** Or you can open the project's `Context menu` -> `Run application` -> `Merge Image Projects`.
 
-**Step 3:** Press 'Open' button on **Workspace Tasks** page after `Application is started` message.
+**Step 3:** Press `Open` button on **Workspace Tasks** page after `Application is started` message.
 
 ## How To Use
 
