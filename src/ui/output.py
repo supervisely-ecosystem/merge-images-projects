@@ -84,6 +84,8 @@ def merge():
         f"Starting iteration over {len(g.STATE.project_ids)} projects to merge..."
     )
 
+    add_tag_meta_to_output_project()
+
     with merge_progress(
         message="Merging projects...", total=len(g.STATE.project_ids)
     ) as pbar:
@@ -250,6 +252,35 @@ def update_annotation(input_ann: sly.Annotation, img_size: Tuple[int, int]):
     ]
     output_ann = sly.Annotation(img_size=img_size, labels=output_labels)
     return output_ann
+
+
+def add_tag_meta_to_output_project():
+    sly.logger.info("Will update TagMetas for output project...")
+    if not g.STATE.output_project_meta:
+        sly.logger.info("Output project meta is not set, creating new one...")
+        g.STATE.output_project_meta = sly.ProjectMeta()
+    for input_project_id in g.STATE.project_ids:
+        input_project_meta = sly.ProjectMeta.from_json(
+            g.api.project.get_meta(input_project_id)
+        )
+
+        tag_metas = input_project_meta.tag_metas
+        for tag_meta in tag_metas:
+            if tag_meta not in g.STATE.output_project_meta.tag_metas:
+                sly.logger.info(
+                    f'Adding tag meta "{tag_meta.name}" to output project meta.'
+                )
+                g.STATE.output_project_meta = g.STATE.output_project_meta.add_tag_meta(
+                    tag_meta
+                )
+
+    sly.logger.debug(
+        "Updated TagMetas for output project, will try to update it on instance..."
+    )
+
+    g.api.project.update_meta(g.STATE.output_project_id, g.STATE.output_project_meta)
+
+    sly.logger.debug("Updated output project meta on instance.")
 
 
 def update_label(input_label: sly.Label):
