@@ -171,7 +171,3 @@ def unlock_project():
 
     lock_projects_button.show()
     unlock_projects_button.hide()
-
-
-for _ in range(g.INIT_PROJECTS_COUNT):
-    add_project_widgets()
