@@ -43,7 +43,7 @@ card = Card(
     title="1️⃣ Input projects",
     description="Select at least two different projects, which will be merged into one.",
     content=Container(
-        [projects_ra, projects_buttons_flexbox, error_text],
+        [projects_buttons_flexbox, error_text],
     ),
     content_top_right=unlock_projects_button,
     collapsable=True,
@@ -171,7 +171,3 @@ def unlock_project():
 
     lock_projects_button.show()
     unlock_projects_button.hide()
-
-
-for _ in range(g.INIT_PROJECTS_COUNT):
-    add_project_widgets()
