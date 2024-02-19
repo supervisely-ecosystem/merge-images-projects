@@ -1,4 +1,5 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
+from collections import defaultdict
 
 import supervisely as sly
 from supervisely.collection.key_indexed_collection import DuplicateKeyError
@@ -179,6 +180,8 @@ def upload_dataset(input_project_id, input_dataset_id, output_dataset_id):
         image_info.name for image_info in g.api.image.get_list(output_dataset_id)
     ]
 
+    processed_image_infos = []
+
     for image_info, ann in zip(input_image_infos, input_anns):
         input_image_id = image_info.id
         input_image_name = image_info.name
@@ -206,6 +209,8 @@ def upload_dataset(input_project_id, input_dataset_id, output_dataset_id):
         img_size = (image_info.height, image_info.width)
         output_ann = update_annotation(ann, img_size)
 
+        processed_image_infos.append(image_info)
+
         output_image_ids.append(input_image_id)
         output_image_names.append(input_image_name)
         output_image_metas.append(input_image_meta)
@@ -214,6 +219,8 @@ def upload_dataset(input_project_id, input_dataset_id, output_dataset_id):
     sly.logger.debug(
         f"Successfully updated annotations for {len(output_anns)} images and prepared them for upload."
     )
+
+    uploaded_image_infos = []
 
     for (
         batched_image_ids,
@@ -226,14 +233,15 @@ def upload_dataset(input_project_id, input_dataset_id, output_dataset_id):
         sly.batched(output_image_metas),
         sly.batched(output_anns),
     ):
-        uploaded_image_infos = g.api.image.upload_ids(
+        batch_uploaded_image_infos = g.api.image.upload_ids(
             output_dataset_id,
             ids=batched_image_ids,
             names=batched_image_names,
             metas=batched_image_metas,
         )
-
-        uploaded_image_ids = [image_info.id for image_info in uploaded_image_infos]
+        uploaded_image_ids = [
+            image_info.id for image_info in batch_uploaded_image_infos
+        ]
 
         g.api.annotation.upload_anns(uploaded_image_ids, batched_anns)
 
@@ -241,9 +249,44 @@ def upload_dataset(input_project_id, input_dataset_id, output_dataset_id):
             f"Successfully uploaded batch of {len(uploaded_image_ids)} images with annotations."
         )
 
+        uploaded_image_infos.extend(batch_uploaded_image_infos)
+
+    upload_image_tags(
+        input_project_id,
+        g.STATE.output_project_id,
+        processed_image_infos,
+        uploaded_image_infos,
+    )
+
     sly.logger.info(
         f"Finished uploading dataset with ID {input_dataset_id} to dataset with ID {output_dataset_id}."
     )
+
+
+def upload_image_tags(
+    input_project_id: int,
+    output_project_id: int,
+    processed_image_infos: List[sly.ImageInfo],
+    uploaded_image_infos: List[sly.ImageInfo],
+):
+    input_tag_map = g.api.image.tag.get_name_to_id_map(input_project_id)
+    reversed_input_tag_map = {v: k for k, v in input_tag_map.items()}
+    output_tag_map = g.api.image.tag.get_name_to_id_map(output_project_id)
+
+    to_upload = defaultdict(list)
+
+    for input_image, output_image in zip(processed_image_infos, uploaded_image_infos):
+        input_image: sly.ImageInfo
+        input_tag_ids = [tag.get("tagId") for tag in input_image.tags]
+        input_tag_names = [reversed_input_tag_map[tag_id] for tag_id in input_tag_ids]
+
+        output_tag_ids = [output_tag_map[tag_name] for tag_name in input_tag_names]
+
+        for tag_id in output_tag_ids:
+            to_upload[tag_id].append(output_image.id)
+
+    for tag_id, image_ids in to_upload.items():
+        g.api.image.add_tag_batch(image_ids, tag_id)
 
 
 def update_annotation(input_ann: sly.Annotation, img_size: Tuple[int, int]):
