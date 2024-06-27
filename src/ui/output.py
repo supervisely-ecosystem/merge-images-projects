@@ -79,7 +79,7 @@ def merge():
     )
 
     if dataset_structure == "Merge into one dataset":
-        output_dataset_id = create_dataset("Merged dataset")
+        output_dataset_id = create_dataset("Merged dataset").id
 
     sly.logger.debug(
         f"Starting iteration over {len(g.STATE.project_ids)} projects to merge..."
@@ -101,17 +101,28 @@ def merge():
                     )
             elif dataset_structure == "Separate dataset for each project":
                 input_project_name = g.api.project.get_info_by_id(input_project_id).name
-                output_dataset_id = create_dataset(input_project_name)
+                output_dataset_id = create_dataset(input_project_name).id
 
                 for input_dataset_id in input_dataset_ids:
                     upload_dataset(
                         input_project_id, input_dataset_id, output_dataset_id
                     )
+            elif dataset_structure == "Use hierarchical structure":
+                input_project_name = g.api.project.get_info_by_id(input_project_id).name
+                parent_dataset = create_dataset(input_project_name)
+                for input_dataset in input_datasets:
+                    output_dataset_id = create_dataset(
+                        input_dataset.name, parent_id=parent_dataset.id
+                    ).id
+                    upload_dataset(
+                        input_project_id, input_dataset.id, output_dataset_id
+                    )
 
             elif dataset_structure == "Save original names":
                 input_dataset_names = [dataset.name for dataset in input_datasets]
                 output_dataset_ids = [
-                    create_dataset(dataset_name) for dataset_name in input_dataset_names
+                    create_dataset(dataset_name).id
+                    for dataset_name in input_dataset_names
                 ]
 
                 for input_dataset_id, output_dataset_id in zip(
@@ -384,7 +395,10 @@ def update_label(input_label: sly.Label):
     return new_label
 
 
-def create_dataset(dataset_name: str) -> int:
+def create_dataset(dataset_name: str, parent_id: int = None) -> sly.DatasetInfo:
     return g.api.dataset.create(
-        g.STATE.output_project_id, dataset_name, change_name_if_conflict=True
-    ).id
+        g.STATE.output_project_id,
+        dataset_name,
+        change_name_if_conflict=True,
+        parent_id=parent_id,
+    )
