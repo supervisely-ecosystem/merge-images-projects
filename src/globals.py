@@ -26,6 +26,7 @@ DATASET_CONFLICTS = [
     "Save original names",
     "Merge into one dataset",
     "Separate dataset for each project",
+    "Use hierarchical structure",
 ]
 INIT_PROJECTS_COUNT = 2
 
