@@ -14,6 +14,7 @@ from supervisely.app.widgets import (
     Input,
     Select,
     Field,
+    Switch,
 )
 
 import src.globals as g
@@ -44,12 +45,20 @@ result_text.hide()
 project_thumbnail = ProjectThumbnail()
 project_thumbnail.hide()
 
+include_empty_classes_switch = Switch()
+include_empty_classes_field = Field(
+    title="Include empty classes",
+    description="Include classes, even there are no labels with them in the input projects.",
+    content=include_empty_classes_switch,
+)
+
 card = Card(
     title="3️⃣ Output",
     description="Choose the name for output project and start the merging process.",
     content=Container(
         [
             dataset_structure_field,
+            include_empty_classes_field,
             output_project_field,
             merge_button,
             merge_progress,
@@ -134,6 +143,16 @@ def merge():
 
             pbar.update(1)
 
+    # TODO: Include empty classes if switch is on.
+    if include_empty_classes_switch.is_on():
+        sly.logger.info(
+            f"Including empty classes in output project {g.STATE.output_project_id}..."
+        )
+        include_empty_classes(g.STATE.project_ids, g.STATE.output_project_id)
+        sly.logger.info(
+            f"Included empty classes in output project {g.STATE.output_project_id}."
+        )
+
     result_text.text = "Successfully merged projects."
     result_text.status = "success"
     result_text.show()
@@ -150,6 +169,26 @@ def merge():
     from src.main import app
 
     app.stop()
+
+
+def include_empty_classes(input_project_ids: List[int], output_project_id: int):
+    output_project_meta = sly.ProjectMeta.from_json(
+        g.api.project.get_meta(output_project_id)
+    )
+
+    for input_project_id in input_project_ids:
+        input_project_meta = sly.ProjectMeta.from_json(
+            g.api.project.get_meta(input_project_id)
+        )
+        for obj_class in input_project_meta.obj_classes:
+            if obj_class not in output_project_meta.obj_classes:
+                output_project_meta = output_project_meta.add_obj_class(obj_class)
+                sly.logger.debug(
+                    f'Added object class "{obj_class.name}" to output project.'
+                )
+
+    g.api.project.update_meta(output_project_id, output_project_meta)
+    sly.logger.debug(f"Updated object classes for output project {output_project_id}.")
 
 
 def create_project(project_name: Optional[str]) -> int:
