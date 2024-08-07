@@ -15,5 +15,5 @@
 		"target": ["ecosystem"],
 		"context_category": ""
 	},
-	"min_instance_version": "6.9.22"
+	"min_instance_version": "6.10.0"
 }
