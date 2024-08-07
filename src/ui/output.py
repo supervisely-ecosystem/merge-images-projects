@@ -1,27 +1,24 @@
-from typing import Optional, Tuple, List
 from collections import defaultdict
+from typing import List, Optional, Tuple
 
 import supervisely as sly
-from supervisely.collection.key_indexed_collection import DuplicateKeyError
-
 from supervisely.app.widgets import (
-    Container,
-    Card,
     Button,
-    ProjectThumbnail,
-    Progress,
-    Text,
-    Input,
-    Select,
+    Card,
+    Container,
     Field,
+    Input,
+    Progress,
+    ProjectThumbnail,
+    Select,
     Switch,
+    Text,
 )
+from supervisely.collection.key_indexed_collection import DuplicateKeyError
 
 import src.globals as g
 
-dataset_structure_select = Select(
-    items=[Select.Item(value=value) for value in g.DATASET_CONFLICTS]
-)
+dataset_structure_select = Select(items=[Select.Item(value=value) for value in g.DATASET_CONFLICTS])
 dataset_structure_field = Field(
     title="Dataset structure",
     description="How datasets should be structured in the output project.",
@@ -83,39 +80,29 @@ def merge():
     create_project(output_project_input.get_value())
 
     dataset_structure = dataset_structure_select.get_value()
-    sly.logger.debug(
-        f"Dataset structure is set to {dataset_structure}, starting merging..."
-    )
+    sly.logger.debug(f"Dataset structure is set to {dataset_structure}, starting merging...")
 
     if dataset_structure == "Merge into one dataset":
         output_dataset_id = create_dataset("Merged dataset").id
 
-    sly.logger.debug(
-        f"Starting iteration over {len(g.STATE.project_ids)} projects to merge..."
-    )
+    sly.logger.debug(f"Starting iteration over {len(g.STATE.project_ids)} projects to merge...")
 
     add_tag_meta_to_output_project()
 
-    with merge_progress(
-        message="Merging projects...", total=len(g.STATE.project_ids)
-    ) as pbar:
+    with merge_progress(message="Merging projects...", total=len(g.STATE.project_ids)) as pbar:
         for input_project_id in g.STATE.project_ids:
             input_datasets = g.api.dataset.get_list(input_project_id)
             input_dataset_ids = [dataset.id for dataset in input_datasets]
 
             if dataset_structure == "Merge into one dataset":
                 for input_dataset_id in input_dataset_ids:
-                    upload_dataset(
-                        input_project_id, input_dataset_id, output_dataset_id
-                    )
+                    upload_dataset(input_project_id, input_dataset_id, output_dataset_id)
             elif dataset_structure == "Separate dataset for each project":
                 input_project_name = g.api.project.get_info_by_id(input_project_id).name
                 output_dataset_id = create_dataset(input_project_name).id
 
                 for input_dataset_id in input_dataset_ids:
-                    upload_dataset(
-                        input_project_id, input_dataset_id, output_dataset_id
-                    )
+                    upload_dataset(input_project_id, input_dataset_id, output_dataset_id)
             elif dataset_structure == "Use hierarchical structure":
                 input_project_name = g.api.project.get_info_by_id(input_project_id).name
                 parent_dataset = create_dataset(input_project_name)
@@ -123,35 +110,26 @@ def merge():
                     output_dataset_id = create_dataset(
                         input_dataset.name, parent_id=parent_dataset.id
                     ).id
-                    upload_dataset(
-                        input_project_id, input_dataset.id, output_dataset_id
-                    )
+                    upload_dataset(input_project_id, input_dataset.id, output_dataset_id)
 
             elif dataset_structure == "Save original names":
                 input_dataset_names = [dataset.name for dataset in input_datasets]
                 output_dataset_ids = [
-                    create_dataset(dataset_name).id
-                    for dataset_name in input_dataset_names
+                    create_dataset(dataset_name).id for dataset_name in input_dataset_names
                 ]
 
                 for input_dataset_id, output_dataset_id in zip(
                     input_dataset_ids, output_dataset_ids
                 ):
-                    upload_dataset(
-                        input_project_id, input_dataset_id, output_dataset_id
-                    )
+                    upload_dataset(input_project_id, input_dataset_id, output_dataset_id)
 
             pbar.update(1)
 
     # TODO: Include empty classes if switch is on.
     if include_empty_classes_switch.is_on():
-        sly.logger.info(
-            f"Including empty classes in output project {g.STATE.output_project_id}..."
-        )
+        sly.logger.info(f"Including empty classes in output project {g.STATE.output_project_id}...")
         include_empty_classes(g.STATE.project_ids, g.STATE.output_project_id)
-        sly.logger.info(
-            f"Included empty classes in output project {g.STATE.output_project_id}."
-        )
+        sly.logger.info(f"Included empty classes in output project {g.STATE.output_project_id}.")
 
     result_text.text = "Successfully merged projects."
     result_text.status = "success"
@@ -162,9 +140,7 @@ def merge():
 
     merge_button.text = "Merge"
 
-    sly.logger.info(
-        f"Successfully merged {len(g.STATE.project_ids)} projects. App finished."
-    )
+    sly.logger.info(f"Successfully merged {len(g.STATE.project_ids)} projects. App finished.")
 
     from src.main import app
 
@@ -172,20 +148,14 @@ def merge():
 
 
 def include_empty_classes(input_project_ids: List[int], output_project_id: int):
-    output_project_meta = sly.ProjectMeta.from_json(
-        g.api.project.get_meta(output_project_id)
-    )
+    output_project_meta = sly.ProjectMeta.from_json(g.api.project.get_meta(output_project_id))
 
     for input_project_id in input_project_ids:
-        input_project_meta = sly.ProjectMeta.from_json(
-            g.api.project.get_meta(input_project_id)
-        )
+        input_project_meta = sly.ProjectMeta.from_json(g.api.project.get_meta(input_project_id))
         for obj_class in input_project_meta.obj_classes:
             if obj_class not in output_project_meta.obj_classes:
                 output_project_meta = output_project_meta.add_obj_class(obj_class)
-                sly.logger.debug(
-                    f'Added object class "{obj_class.name}" to output project.'
-                )
+                sly.logger.debug(f'Added object class "{obj_class.name}" to output project.')
 
     g.api.project.update_meta(output_project_id, output_project_meta)
     sly.logger.debug(f"Updated object classes for output project {output_project_id}.")
@@ -210,16 +180,14 @@ def upload_dataset(input_project_id, input_dataset_id, output_dataset_id):
     )
 
     input_image_infos = g.api.image.get_list(input_dataset_id)
-    input_project_meta = sly.ProjectMeta.from_json(
-        g.api.project.get_meta(input_project_id)
-    )
-    input_anns = [
-        sly.Annotation.from_json(ann_json, input_project_meta)
-        for ann_json in g.api.annotation.download_json_batch(
-            input_dataset_id,
-            [image_info.id for image_info in input_image_infos],
-        )
-    ]
+    input_project_meta = sly.ProjectMeta.from_json(g.api.project.get_meta(input_project_id))
+
+    image_ids = [image_info.id for image_info in input_image_infos]
+    ann_jsons = g.api.annotation.download_json_batch(input_dataset_id, image_ids)
+    input_anns = []
+    for ann_json in ann_jsons:
+        annotation = sly.Annotation.from_json(ann_json, input_project_meta)
+        input_anns.append(annotation)
 
     output_image_ids = []
     output_image_names = []
@@ -248,9 +216,7 @@ def upload_dataset(input_project_id, input_dataset_id, output_dataset_id):
                 )
                 continue
             elif g.STATE.conflict_settings.image_conflicts == "Rename":
-                input_image_name = g.api.image.get_free_name(
-                    output_dataset_id, input_image_name
-                )
+                input_image_name = g.api.image.get_free_name(output_dataset_id, input_image_name)
 
                 sly.logger.debug(
                     f"Conflict resolution is set to 'Rename', the image was renamed to {input_image_name}."
@@ -289,9 +255,7 @@ def upload_dataset(input_project_id, input_dataset_id, output_dataset_id):
             names=batched_image_names,
             metas=batched_image_metas,
         )
-        uploaded_image_ids = [
-            image_info.id for image_info in batch_uploaded_image_infos
-        ]
+        uploaded_image_ids = [image_info.id for image_info in batch_uploaded_image_infos]
 
         g.api.annotation.upload_anns(uploaded_image_ids, batched_anns)
 
@@ -328,21 +292,22 @@ def upload_image_tags(
     for input_image, output_image in zip(processed_image_infos, uploaded_image_infos):
         input_image: sly.ImageInfo
         input_tag_ids = [tag.get("tagId") for tag in input_image.tags]
+        input_tag_values = [tag.get("value") for tag in input_image.tags]
         input_tag_names = [reversed_input_tag_map[tag_id] for tag_id in input_tag_ids]
 
         output_tag_ids = [output_tag_map[tag_name] for tag_name in input_tag_names]
 
-        for tag_id in output_tag_ids:
-            to_upload[tag_id].append(output_image.id)
+        for tag_id, tag_value in zip(output_tag_ids, input_tag_values):
+            # to_upload[tag_id].append(output_image.id)
+            to_upload[output_image.id].append({"tagId": tag_id, "value": tag_value})
 
-    for tag_id, image_ids in to_upload.items():
-        g.api.image.add_tag_batch(image_ids, tag_id)
+    for image_id, tag_data in to_upload.items():
+        for tag in tag_data:
+            g.api.image.add_tag(image_id, tag["tagId"], tag["value"])
 
 
 def update_annotation(input_ann: sly.Annotation, img_size: Tuple[int, int]):
-    output_labels = [
-        update_label(label) for label in input_ann.labels if update_label(label)
-    ]
+    output_labels = [update_label(label) for label in input_ann.labels if update_label(label)]
     output_ann = sly.Annotation(img_size=img_size, labels=output_labels)
     return output_ann
 
@@ -353,26 +318,23 @@ def add_tag_meta_to_output_project():
         sly.logger.info("Output project meta is not set, creating new one...")
         g.STATE.output_project_meta = sly.ProjectMeta()
     for input_project_id in g.STATE.project_ids:
-        input_project_meta = sly.ProjectMeta.from_json(
-            g.api.project.get_meta(input_project_id)
-        )
+        input_project_meta = sly.ProjectMeta.from_json(g.api.project.get_meta(input_project_id))
 
         tag_metas = input_project_meta.tag_metas
         for tag_meta in tag_metas:
-            if tag_meta not in g.STATE.output_project_meta.tag_metas:
+            g.STATE.output_project_meta: sly.ProjectMeta
+            existing_tag_meta = g.STATE.output_project_meta.get_tag_meta(tag_meta.name)
+            # Check if tag is already in output project meta to avoid duplicates
+            if existing_tag_meta is None:
+                g.STATE.output_project_meta = g.STATE.output_project_meta.add_tag_meta(tag_meta)
+                sly.logger.info(f'Added tag meta: "{tag_meta.name}" to output project meta.')
+            else:
                 sly.logger.info(
-                    f'Adding tag meta "{tag_meta.name}" to output project meta.'
-                )
-                g.STATE.output_project_meta = g.STATE.output_project_meta.add_tag_meta(
-                    tag_meta
+                    f'Tag meta: "{tag_meta.name}" is already in output project meta, skipping...'
                 )
 
-    sly.logger.debug(
-        "Updated TagMetas for output project, will try to update it on instance..."
-    )
-
+    sly.logger.debug("Updated TagMetas for output project, will try to update it on instance...")
     g.api.project.update_meta(g.STATE.output_project_id, g.STATE.output_project_meta)
-
     sly.logger.debug("Updated output project meta on instance.")
 
 
@@ -388,10 +350,15 @@ def update_label(input_label: sly.Label):
     new_label = input_label
 
     for tag in input_label.tags:
-        if tag.meta not in output_project_meta.tag_metas:
-            sly.logger.debug(f"Adding tag meta {tag.meta.name} to output project meta.")
-
+        existing_tag_meta = output_project_meta.get_tag_meta(tag.name)
+        # Check if tag is already in output project meta to avoid duplicates
+        if existing_tag_meta is None:
             output_project_meta = output_project_meta.add_tag_meta(tag.meta)
+            sly.logger.info(f'Added tag meta: "{tag.name}" to output project meta.')
+        else:
+            sly.logger.info(
+                f'Tag meta: "{tag.name}" is already in output project meta, skipping...'
+            )
 
     for obj_class in output_project_meta.obj_classes:
         if obj_class.name == input_label.obj_class.name:
@@ -417,14 +384,13 @@ def update_label(input_label: sly.Label):
                     new_obj_class = input_label.obj_class.clone(
                         name=f"{input_label.obj_class.name}_{input_label.obj_class.geometry_type.geometry_name()}"
                     )
+
                     new_label = input_label.clone(obj_class=new_obj_class)
 
     try:
         output_project_meta = output_project_meta.add_obj_class(new_obj_class)
         g.STATE.output_project_meta = output_project_meta
-        g.api.project.update_meta(
-            g.STATE.output_project_id, g.STATE.output_project_meta
-        )
+        g.api.project.update_meta(g.STATE.output_project_id, g.STATE.output_project_meta)
     except DuplicateKeyError:
         sly.logger.debug(
             f"Output project meta already contanins object class with name {new_obj_class.name}. "
