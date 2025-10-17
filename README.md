@@ -10,7 +10,7 @@
    <a href="#Result">Result</a> 
 </p>
 
-[![](https://img.shields.io/badge/supervisely-ecosystem-brightgreen)](../../../../supervisely-ecosystem/merge-images-projects)
+[![](https://img.shields.io/badge/supervisely-ecosystem-brightgreen)](https://ecosystem.supervisely.com/apps/supervisely-ecosystem/merge-images-projects)
 [![](https://img.shields.io/badge/slack-chat-green.svg?logo=slack)](https://supervisely.com/slack)
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/supervisely-ecosystem/merge-images-projects)
 [![views](https://app.supervisely.com/img/badges/views/supervisely-ecosystem/merge-images-projects.png)](https://supervisely.com)
@@ -26,7 +26,7 @@ Looking for an efficient way to merge multiple image projects into one? This app
 
 ## How To Run
 
-**Step 1:** Go to **Ecosystem** page and find the app [Merge Image Projects](../../../../supervisely-ecosystem/merge-images-projects).
+**Step 1:** Go to **Ecosystem** page and find the app [Merge Image Projects](https://ecosystem.supervisely.com/apps/merge-images-projects).
 
 <img data-key="sly-module-link" data-module-slug="supervisely-ecosystem/merge-images-projects" img src="https://github.com/supervisely-ecosystem/merge-images-projects/assets/115161827/ee88be31-1c9f-4f0a-9ac1-4f235e913c6d" width="500px" style='padding-bottom: 20px'/> 
 
