@@ -3,7 +3,7 @@
 	"version": "2.0.0",
 	"name": "Merge Image Projects",
 	"description": "Merge multiple image projects into a single one",
-	"docker_image": "supervisely/base-py-sdk:6.73.150",
+	"docker_image": "supervisely/base-py-sdk:6.73.564",
 	"categories": ["images", "project management", "data operations"],
 	"icon": "https://github.com/supervisely-ecosystem/merge-images-projects/assets/119248312/15991245-760b-4efb-b82b-6de0051c5c17",
 	"icon_cover": true,
